@@ -1,7 +1,10 @@
 import * as React from 'react';
 import styled from 'styled-components';
 
-const Wrapper = styled.div`
+import { sendMessage } from '../../actions';
+import chat from '../../Service/chat';
+
+const Wrapper = styled.form`
     position: fixed;
     bottom: 0px;
     background: white;
@@ -31,14 +34,38 @@ const SendButton = styled.button`
 `;
 
 export default class MessageForm extends React.Component {
-    constructor(props) {super(props)}
+    constructor(props) {
+        super(props)
+        this.state = {
+            message: '',
+        }
+
+        this.reflectToState = this.reflectToState.bind(this);
+        this.send = this.send.bind(this);
+    }
+
+    send() {
+        const {message} = this.state;
+        chat.send(sendMessage(message));
+        this.setState({
+            message: ''
+        });
+    }
+
+    reflectToState(e) {
+        const name = e.target.getAttribute('name');
+        const value = e.target.value;
+        this.setState({
+            [name]: value
+        });
+    }
 
     render() {
-
+        const { message } = this.state;
         return (
             <Wrapper>
-                <TextArea placeholder="Новое сообщение" />
-                <SendButton> Отправить </SendButton>
+                <TextArea name='message' onChange={this.reflectToState} placeholder="Новое сообщение" value={message} />
+                <SendButton onClick={this.send}> Отправить </SendButton>
             </Wrapper>
         )
     }

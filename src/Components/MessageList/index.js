@@ -10,16 +10,18 @@ const Message = ({text}) => {
 }
 
 
-const MessageList = ({messages}) => (
-    <div>
-        {
-            messages && messages.map(m => <Message {...m} />)
-        }
-        messageList
-    </div>
-);
+const MessageList = ({messages}) => {
+    return (
+        <div>
+            {
+                messages && messages.map(m => <Message {...m.data} />)
+            }
+            messageList
+        </div>
+    );
+}
 
 
 export default connect((state) => ({
-    messages: state
+    messages: state.messages
 }))(MessageList);

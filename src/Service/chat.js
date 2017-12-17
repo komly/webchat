@@ -1,4 +1,8 @@
-import { getStete, dispatch } from '../store';
+import store, { getState } from '../store';
+
+import actions from '../actions';
+
+const dispatch = store.dispatch.bind(store);
 
 class Chat {
     constructor() {
@@ -20,6 +24,7 @@ class Chat {
         };
     }
     send(data) {
+        console.log('data', data);
         this.socket.send(JSON.stringify(data));
     }
 

@@ -25337,9 +25337,17 @@ var _styledComponents = __webpack_require__(9);
 
 var _styledComponents2 = _interopRequireDefault(_styledComponents);
 
+var _actions = __webpack_require__(82);
+
+var _chat = __webpack_require__(80);
+
+var _chat2 = _interopRequireDefault(_chat);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -25349,7 +25357,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 function _taggedTemplateLiteral(strings, raw) { return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } })); }
 
-var Wrapper = _styledComponents2.default.div(_templateObject);
+var Wrapper = _styledComponents2.default.form(_templateObject);
 
 var TextArea = _styledComponents2.default.textarea(_templateObject2);
 var SendButton = _styledComponents2.default.button(_templateObject3);
@@ -25360,20 +25368,46 @@ var MessageForm = function (_React$Component) {
     function MessageForm(props) {
         _classCallCheck(this, MessageForm);
 
-        return _possibleConstructorReturn(this, (MessageForm.__proto__ || Object.getPrototypeOf(MessageForm)).call(this, props));
+        var _this = _possibleConstructorReturn(this, (MessageForm.__proto__ || Object.getPrototypeOf(MessageForm)).call(this, props));
+
+        _this.state = {
+            message: ''
+        };
+
+        _this.reflectToState = _this.reflectToState.bind(_this);
+        _this.send = _this.send.bind(_this);
+        return _this;
     }
 
     _createClass(MessageForm, [{
+        key: 'send',
+        value: function send() {
+            var message = this.state.message;
+
+            _chat2.default.send((0, _actions.sendMessage)(message));
+            this.setState({
+                message: ''
+            });
+        }
+    }, {
+        key: 'reflectToState',
+        value: function reflectToState(e) {
+            var name = e.target.getAttribute('name');
+            var value = e.target.value;
+            this.setState(_defineProperty({}, name, value));
+        }
+    }, {
         key: 'render',
         value: function render() {
+            var message = this.state.message;
 
             return React.createElement(
                 Wrapper,
                 null,
-                React.createElement(TextArea, { placeholder: '\u041D\u043E\u0432\u043E\u0435 \u0441\u043E\u043E\u0431\u0449\u0435\u043D\u0438\u0435' }),
+                React.createElement(TextArea, { name: 'message', onChange: this.reflectToState, placeholder: '\u041D\u043E\u0432\u043E\u0435 \u0441\u043E\u043E\u0431\u0449\u0435\u043D\u0438\u0435', value: message }),
                 React.createElement(
                     SendButton,
-                    null,
+                    { onClick: this.send },
                     ' \u041E\u0442\u043F\u0440\u0430\u0432\u0438\u0442\u044C '
                 )
             );
@@ -25424,11 +25458,12 @@ var Message = function Message(_ref) {
 
 var MessageList = function MessageList(_ref2) {
     var messages = _ref2.messages;
+
     return React.createElement(
         'div',
         null,
         messages && messages.map(function (m) {
-            return React.createElement(Message, m);
+            return React.createElement(Message, m.data);
         }),
         'messageList'
     );
@@ -25436,7 +25471,7 @@ var MessageList = function MessageList(_ref2) {
 
 exports.default = (0, _reactRedux.connect)(function (state) {
     return {
-        messages: state
+        messages: state.messages
     };
 })(MessageList);
 
@@ -25455,7 +25490,17 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _store = __webpack_require__(30);
 
+var _store2 = _interopRequireDefault(_store);
+
+var _actions = __webpack_require__(82);
+
+var _actions2 = _interopRequireDefault(_actions);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var dispatch = _store2.default.dispatch.bind(_store2.default);
 
 var Chat = function () {
     function Chat() {
@@ -25466,7 +25511,7 @@ var Chat = function () {
         this.socket.onmessage = function (_ref) {
             var data = _ref.data;
 
-            (0, _store.dispatch)({
+            dispatch({
                 type: 'NEW_MESSAGE',
                 payload: JSON.parse(data)
             });
@@ -25484,6 +25529,7 @@ var Chat = function () {
     _createClass(Chat, [{
         key: 'send',
         value: function send(data) {
+            console.log('data', data);
             this.socket.send(JSON.stringify(data));
         }
     }]);
@@ -25504,17 +25550,46 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
-exports.default = function (state, action) {
+exports.default = function () {
+    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+    var action = arguments[1];
+
     switch (action.type) {
         case 'NEW_MESSAGE':
             return {
                 messages: [].concat(_toConsumableArray(state.messages), [action.payload])
             };
         default:
-            return state;
+            // return state;
+            return _extends({}, state, {
+                messages: []
+            });
     }
+};
+
+/***/ }),
+/* 82 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+var SEND_MESSAGE = exports.SEND_MESSAGE = 'SEND_MESSAGE';
+
+var sendMessage = exports.sendMessage = function sendMessage(message) {
+    return {
+        type: SEND_MESSAGE,
+        data: {
+            text: message
+        }
+    };
 };
 
 /***/ })

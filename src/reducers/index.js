@@ -1,5 +1,5 @@
 
-export default (state, action) => {
+export default (state = {}, action) => {
     switch(action.type) {
         case 'NEW_MESSAGE':
             return {
@@ -9,6 +9,10 @@ export default (state, action) => {
                 ]
             };
         default: 
-            return state;
+            // return state;
+            return {
+                ...state,
+                messages: []
+            }
     }
 }
